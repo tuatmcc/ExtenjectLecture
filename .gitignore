@@ -220,3 +220,7 @@ sysinfo.txt
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 # End of https://www.toptal.com/developers/gitignore/api/unity,jetbrains,macos
+
+# Nuget for Unity Packages
+/Assets/Packages/
+/Assets/Packages.meta
