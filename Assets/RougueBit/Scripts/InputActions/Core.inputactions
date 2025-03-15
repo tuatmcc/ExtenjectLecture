@@ -1,0 +1,34 @@
+{
+    "name": "Core",
+    "maps": [
+        {
+            "name": "Main",
+            "id": "110174bb-7809-4203-b826-2aa344046f0d",
+            "actions": [
+                {
+                    "name": "Reset",
+                    "type": "Button",
+                    "id": "245c38f9-98a8-4694-8c04-7e53d656622f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "fed3ce17-db19-43a3-a0d0-fd003eb4d4ec",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Reset",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
