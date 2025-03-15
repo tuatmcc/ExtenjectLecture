@@ -8,7 +8,7 @@ namespace RougueBit.Title
 {
     public class TitleManager: ITitleManager, IInitializable, IDisposable
     {
-        [Inject] private readonly GameStateManager _gameStateManager;
+        [Inject] private readonly IGameStateManager _gameStateManager;
 
         public TitleInputs TitleInputs { get; private set; } = new();
 
