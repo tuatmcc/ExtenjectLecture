@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d476df393850db46b0d013341a59253, type: 3}
+  m_Name: PlaySceneSettings
+  m_EditorClassIdentifier: 
+  width: 50
+  depth: 50
+  minRoomSize: 5
+  maxRoomSize: 15
+  maxRooms: 10
+  wallPrefab: {fileID: 8493363602248408319, guid: 1a701e04355f5b64e9ee2c18064d8154, type: 3}
+  floorPrefab: {fileID: 4948655340765647157, guid: 7d5408932605a194cb3fc30bb0828fcd, type: 3}
