@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9cbd6effd2fc7df4c924c59864c2ce81, type: 3}
   m_Name: PlaySceneSettingsInstaller
   m_EditorClassIdentifier: 
-  playSceneSO: {fileID: 0}
+  playSceneSO: {fileID: 11400000, guid: b4bf83b334c8a0349b33f1162e5798f0, type: 2}
