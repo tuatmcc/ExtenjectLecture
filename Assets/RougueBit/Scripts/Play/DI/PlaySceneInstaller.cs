@@ -3,7 +3,7 @@ using Zenject;
 
 namespace RougueBit.Play.DI
 {
-    public class PlayManagerInstaller : MonoInstaller
+    public class PlaySceneInstaller : MonoInstaller
     {
         public override void InstallBindings()
         {

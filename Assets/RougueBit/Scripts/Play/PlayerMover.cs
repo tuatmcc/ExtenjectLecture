@@ -1,4 +1,6 @@
+using R3;
 using RougueBit.Play.Interface;
+using Unity.VisualScripting;
 using UnityEngine;
 using Zenject;
 
@@ -8,22 +10,38 @@ namespace RougueBit.Play
     {
         [Inject] IPlayManager playManager;
 
+        private PlaySceneSO playSceneSO;
         private Rigidbody rb;
+        private Animator animator;
         private float moveSpeed;
         private float moveAcceleration;
         private float rotateSpeed;
 
+        private static readonly int MoveHash = Animator.StringToHash("Move");
+
         [Inject]
         public void Construct(PlaySceneSO playSceneSO)
         {
+            this.playSceneSO = playSceneSO;
             moveSpeed = playSceneSO.PlayerMoveSpeed;
             moveAcceleration = playSceneSO.PlayerAcceleration;
             rotateSpeed = playSceneSO.PlayerRotationSpeed;
         }
 
-        void Start()
+        void Awake()
         {
             rb = GetComponent<Rigidbody>();
+            animator = GetComponent<Animator>();
+            Observable.FromEvent<PlayState>(
+                h => playManager.OnPlayStateChanged += h,
+                h => playManager.OnPlayStateChanged -= h
+            ).Subscribe(state => {
+                if (state == PlayState.SetPlayer)
+                {
+                    // IsKenematicがfalseだとtransformで位置を変更できない
+                    rb.position = new Vector3(playSceneSO.PlayerStartPosition.x, 0, playSceneSO.PlayerStartPosition.y);
+                }
+            });
         }
 
         // メモ: 移動は Update() + Time.deltaTimeを使うとカクついてしまうのでFixedUpdate()を使う
@@ -31,6 +49,7 @@ namespace RougueBit.Play
         {
             Move();
             Rotate();
+            animator.SetFloat(MoveHash, Mathf.Clamp(rb.linearVelocity.magnitude / moveSpeed , 0f, 1f));
         }
 
         private void Move()

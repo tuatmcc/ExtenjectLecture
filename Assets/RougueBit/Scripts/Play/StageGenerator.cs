@@ -4,10 +4,11 @@ using UnityEngine.Rendering;
 using System.Linq;
 using System;
 using Zenject;
+using RougueBit.Play.Interface;
 
 namespace RougueBit.Play
 {
-    public class StageGenerator
+    public class StageGenerator: IStageGeneratable
     {
         private readonly int width = 50;
         private readonly int depth = 50; // Z方向のサイズ
@@ -17,8 +18,8 @@ namespace RougueBit.Play
         private readonly GameObject wallPrefab;
         private readonly GameObject floorPrefab;
 
-        public List<Rect> Rooms { get; private set; }
-        public int[,] Map { get; private set; }
+        private List<Rect> rooms;
+        private int[,] map;
         private GameObject stageParent; // すべてのオブジェクトの親
 
         public StageGenerator(PlaySceneSO playSceneSettings)
@@ -34,8 +35,8 @@ namespace RougueBit.Play
 
         public void Generate()
         {
-            Rooms = new List<Rect>();
-            Map = new int[width, depth];
+            rooms = new List<Rect>();
+            map = new int[width, depth];
 
             // 親オブジェクトを作成
             stageParent = new GameObject("Stage");
@@ -45,7 +46,7 @@ namespace RougueBit.Play
             {
                 for (int z = 0; z < depth; z++)
                 {
-                    Map[x, z] = 1; // 初期状態は壁
+                    map[x, z] = 1; // 初期状態は壁
                 }
             }
 
@@ -62,6 +63,22 @@ namespace RougueBit.Play
 
             // マップを描画
             DrawMap();
+        }
+
+        public Vector2 GetRandomFloor()
+        {
+            List<Vector2> floorList = new();
+            for (int x = 0; x < width; x++)
+            {
+                for (int z = 0; z < depth; z++)
+                {
+                    if (map[x, z] == 0)
+                    {
+                        floorList.Add(new Vector2(x, z));
+                    }
+                }
+            }
+            return floorList[UnityEngine.Random.Range(0, floorList.Count)];
         }
 
         private void GenerateDungeon(Rect area)
@@ -91,23 +108,23 @@ namespace RougueBit.Play
                 int roomZ = UnityEngine.Random.Range((int)area.yMin, (int)area.yMax - roomHeight);
 
                 Rect room = new Rect(roomX, roomZ, roomWidth, roomHeight);
-                Rooms.Add(room);
+                rooms.Add(room);
             }
         }
 
         private void ReduceRooms()
         {
             // 部屋をシャッフル
-            Rooms = Rooms.OrderBy(_ => Guid.NewGuid()).ToList();
-            while (Rooms.Count > maxRooms)
+            rooms = rooms.OrderBy(_ => Guid.NewGuid()).ToList();
+            while (rooms.Count > maxRooms)
             {
-                Rooms.RemoveAt(Rooms.Count - 1);
+                rooms.RemoveAt(rooms.Count - 1);
             }
         }
 
         private void FillRooms()
         {
-            foreach (Rect room in Rooms)
+            foreach (Rect room in rooms)
             {
                 FillRoom(room);
             }
@@ -119,17 +136,17 @@ namespace RougueBit.Play
             {
                 for (int z = (int)room.yMin; z < (int)room.yMax; z++)
                 {
-                    Map[x, z] = 0; // 0は床
+                    map[x, z] = 0; // 0は床
                 }
             }
         }
 
         private void ConnectRooms()
         {
-            for (int i = 0; i < Rooms.Count - 1; i++)
+            for (int i = 0; i < rooms.Count - 1; i++)
             {
-                Vector2 roomCenterA = new(Rooms[i].center.x, Rooms[i].center.y);
-                Vector2 roomCenterB = new(Rooms[i + 1].center.x, Rooms[i + 1].center.y);
+                Vector2 roomCenterA = new(rooms[i].center.x, rooms[i].center.y);
+                Vector2 roomCenterB = new(rooms[i + 1].center.x, rooms[i + 1].center.y);
 
                 if (UnityEngine.Random.value > 0.5f)
                 {
@@ -148,7 +165,7 @@ namespace RougueBit.Play
         {
             for (int x = Mathf.Min(xStart, xEnd); x <= Mathf.Max(xStart, xEnd); x++)
             {
-                Map[x, z] = 0;
+                map[x, z] = 0;
             }
         }
 
@@ -156,7 +173,7 @@ namespace RougueBit.Play
         {
             for (int z = Mathf.Min(zStart, zEnd); z <= Mathf.Max(zStart, zEnd); z++)
             {
-                Map[x, z] = 0;
+                map[x, z] = 0;
             }
         }
 
@@ -165,13 +182,13 @@ namespace RougueBit.Play
         {
             for (int x = 0; x < width; x++)
             {
-                Map[x, 0] = 1;
-                Map[x, depth - 1] = 1;
+                map[x, 0] = 1;
+                map[x, depth - 1] = 1;
             }
             for (int z = 0; z < depth; z++)
             {
-                Map[0, z] = 1;
-                Map[width - 1, z] = 1;
+                map[0, z] = 1;
+                map[width - 1, z] = 1;
             }
         }
 
@@ -182,7 +199,7 @@ namespace RougueBit.Play
                 for (int z = 0; z < depth; z++)
                 {
                     GameObject tile;
-                    if (Map[x, z] == 1)
+                    if (map[x, z] == 1)
                     {
                         // 壁
                         tile = GameObject.Instantiate(wallPrefab);

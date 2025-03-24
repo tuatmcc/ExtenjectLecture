@@ -16,6 +16,7 @@ namespace RougueBit.Play
         public float PlayerMoveSpeed => playerMoveSpeed;
         public float PlayerAcceleration => playerMoveAcceleration;
         public float PlayerRotationSpeed => playerRotationSpeed;
+        public Vector2 PlayerStartPosition { get => playerStartPosition; set => playerStartPosition = value; }
 
         [SerializeField] private int stageWidth = 50;
         [SerializeField] private int stageDepth = 50; // Z方向のサイズ
@@ -27,5 +28,7 @@ namespace RougueBit.Play
         [SerializeField] private float playerMoveSpeed = 5f;
         [SerializeField] private float playerMoveAcceleration = 10f;
         [SerializeField] private float playerRotationSpeed = 10f;
+        
+        private Vector2 playerStartPosition = new(0, 0);
     }
 }
