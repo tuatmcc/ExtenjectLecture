@@ -1,3 +1,4 @@
+using RougueBit.Play.Tests;
 using UnityEngine;
 using Zenject;
 
@@ -7,7 +8,7 @@ namespace RougueBit.Play.DI
     {
         public override void InstallBindings()
         {
-            Container.BindInterfacesTo<PlayManager>().AsSingle();
+            Container.BindInterfacesTo<TestPlayManager>().AsSingle();
         }
     }
 }
