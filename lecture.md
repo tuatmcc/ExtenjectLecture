@@ -1,3 +1,6 @@
+# はじめに
+この講習を始める前に、使用するエディタUnity6(6000.0.40.f1)のインストールを行い、リポジトリのクローンも合わせてお願いします。
+
 # Extenjectとは何か
 Extenject(旧Zenject)は、Unityで依存性注入を実現するために用いられるライブラリです。
 ## 依存性注入(DI)とは
@@ -73,6 +76,8 @@ public class Example
 
 このように、DIを使うと注入するクラスを変更するだけでテストを行えるようになります。
 
+本番で使うコードからテスト用の記述を完全に排除できる点もポイント高いです。
+
 ### MonoBehaviorの無駄な継承を減らせる
 UnityでExtenjectを使う利点として、`MonoBehavior`の無駄な継承を減らすことができるというものがあります。
 
@@ -80,9 +85,9 @@ UnityでExtenjectを使う利点として、`MonoBehavior`の無駄な継承を�
 
 しかし、`GameManager`が`MonoBehavior`を継承し、ゲームオブジェクトにアタッチされる必要はあるでしょうか。その必要はないことがほとんどだと思います。
 
-詳しい使い方は後述しますが、Extenjectを使うと`MonoBehavior`を継承せず、ヒエラルキーに"Manager"という名前のオブジェクトを置くこともなくManager系のクラスを定義することができます。
+Extenjectを使うと`MonoBehavior`を継承せず、ヒエラルキーに"Manager"という名前のオブジェクトを置くこともなくManager系のクラスを定義することができます。
 
-また、`MonoBehavior`を継承せずとも`Start()`や`Update()`に相当するメソッドを実装する方法をExtenjectが用意してくれているので、ライフサイクルに準じた処理を書くことができます。
+後述しますが、`MonoBehavior`を継承せずとも`Start()`や`Update()`などに相当するメソッドを実装する方法をExtenjectが用意してくれているので、ライフサイクルに準じた処理を書くこともできます。
 
 # DIしてみよう
 実際にDIしてみましょう。
@@ -92,7 +97,7 @@ UnityでExtenjectを使う利点として、`MonoBehavior`の無駄な継承を�
 
 https://github.com/tuatmcc/ExtenjectLecture
 
-RougueBitというローグライク(?)なゲーム(適当)を作っていきます。
+RougueBitというローグライク(?)なゲーム(未完)を作っていきます。
 
 ## 前提条件
 以下のようなディレクトリ構成になっていると仮定して話を進めていきます。存在しないディレクトリが説明に現れた際はProjectタブから適宜作成してください。また、C#スクリプトの作成はProjectタブでスクリプトを置きたいディレクトリを開いてその上で右クリックし、[Create] > [Scripting] > [{作りたいスクリプトの種別}] を選択することでできます。Unity6への更新でUIが少し変わっているので注意してください。
@@ -238,7 +243,7 @@ namespace RougueBit.Core
 ### Installerを作る
 Injectを行うには、Injectしたいオブジェクトに対応するInstallerを書く必要があります。(Contextが同じなら1つのファイルにまとめることもできる)
 
-`Assets/RougueBit/Scripts/Core/DI`に`GameStateManagerInstaller.cs`を作ります。[Create] > [Zenject] > [Mono Installer] から作成できます。([Windows]: この方法で生成したスクリプトは改行コードがCRLFではなくLFになります)
+`Assets/RougueBit/Scripts/Core/DI`に`GameStateManagerInstaller.cs`を作ります。[Create] > [Zenject] > [Mono Installer] から作成できます。
 
 ```c#:GameStateManagerInstaller.cs
 using Zenject;
@@ -338,11 +343,21 @@ namespace RougueBit.Title
 
 Enterを押すと`Play`シーンに移動する処理が書かれています。
 
-この部分に注目しましょう。`[SerializeField]`と同じように`[Inject]`という属性をつけてあげることで、このクラスのインスタンスが生成されたときに`IGameStateManager`が注入されます。これによって、`_gameStateManager`変数からIGameStateManagerにアクセスできます。
+以下の部分に注目しましょう。`[SerializeField]`と同じように`[Inject]`という属性をつけてあげることで、このクラスのインスタンスが生成されたときに`IGameStateManager`が注入されます。これによって、`_gameStateManager`変数からIGameStateManagerにアクセスできます。
 
 ```c#
 [Inject] private readonly GameStateManager _gameStateManager; // Inject
 ```
+
+また、Extenjectでは以下のように`MonoBehavior`におけるライフサイクルに準じたメソッドを実装するためのインターフェースが用意されています。
+
+| MonoBehavior | 非MonoBehavior |
+|:-:|:-:|
+| `Awake` | コンストラクタ(C#標準) |
+| `Start` | `Initialize`(`IInitializable`を実装) |
+| `Update` | `Tick`(`ITickable`を実装) |
+| `FixedUpdate` | `FixedTick`(`IFixedTickable`を実装) |
+| `OnDestroy` | `Disposable`(C#標準`IDisposable`を実装) |
 
 さて、Injectされるためのコードを書いたので`Title`シーンで動くようにしましょう。シーン上でInjectされるようにするには、シーン上に`SceneContext`を置く必要があります。
 
@@ -509,7 +524,129 @@ public void Construct(PlaySceneSO playSceneSO)
 #### 確認
 `Play`シーンを再生してSceneタブで確認してみてください。再生するたびに部屋と通路がランダムに生成されていれば問題ありません。
 
+### ブランチ移動
+これまでの変更をStashするかDiscardして、ブランチ`lecture-checkpoints/3`に移動してください。
+
+### テスト用のコードに切り替えてみる
+PlayManagerをテスト用のコードに切り替えてみましょう。
+`Assets/RougueBit/Scripts/Play/Tests`に`TestPlayManager.cs`を作り、以下の内容を書き込みます。
+
+```c#:TestPlayManager.cs
+using R3;
+using RougueBit.Play.Interface;
+using System;
+using UnityEngine;
+using Zenject;
+
+namespace RougueBit.Play.Tests
+{
+    public class TestPlayManager : IPlayManager, IInitializable, IDisposable
+    {
+        public event Action<PlayState> OnPlayStateChanged;
+
+        public PlayState PlayState
+        {
+            get => playState;
+            private set
+            {
+                playState = value;
+                OnPlayStateChanged?.Invoke(playState);
+            }
+        }
+
+
+        public PlayInputs PlayInputs { get; } = new();
+
+        private PlayState playState;
+        private IStageGeneratable stageGenerator;
+        private PlaySceneSO playSceneSO;
+
+        [Inject]
+        public TestPlayManager(PlaySceneSO playSceneSO)
+        {
+            this.playSceneSO = playSceneSO;
+            PlayInputs.Enable();
+            stageGenerator = new TestStageGenerator(playSceneSO);
+        }
+
+        public void Initialize()
+        {
+            Observable.FromEvent<PlayState>(
+                h => OnPlayStateChanged += h,
+                h => OnPlayStateChanged -= h
+            ).Subscribe(NextState);
+            PlayState = PlayState.GenerateStage;
+        }
+
+        private void NextState(PlayState nextState)
+        {
+            switch (nextState)
+            {
+                case PlayState.GenerateStage:
+                    stageGenerator.Generate();
+                    playSceneSO.PlayerStartPosition = stageGenerator.GetRandomFloor();
+                    PlayState = PlayState.SetPlayer;
+                    break;
+                case PlayState.SetPlayer:
+                    break;
+                case PlayState.Playing:
+                    break;
+            }
+        }
+
+        public void Dispose()
+        {
+            PlayInputs.Disable();
+        }
+    }
+}
+```
+
+テスト用のステージ生成スクリプトを使って壁のないステージ生成をするようにしています。
+
+このテスト用のManagerを使うように変更してみましょう。
+
+`Assets/RougueBit/Scripts/Play/DI/PlaySceneInstaller.cs`の内容を以下に変更します。
+
+```c#:PlaySceneInstaller.cs
+using RougueBit.Play.Tests;
+using UnityEngine;
+using Zenject;
+
+namespace RougueBit.Play.DI
+{
+    public class PlaySceneInstaller : MonoInstaller
+    {
+        [SerializeField] private bool isTest;
+
+        public override void InstallBindings()
+        {
+            if (isTest)
+            {
+                Container.BindInterfacesTo<TestPlayManager>().AsSingle();
+            }
+            else
+            {
+                Container.BindInterfacesTo<PlayManager>().AsSingle();
+            }
+        }
+    }
+}
+```
+
+このように変更したことで`Play`シーンのSceneContextにアタッチされている`PlaySceneInstaller`に`IsTest`というチェックボックスが現れました。`isTest`が`true`ならテスト用の`TestPlayManager`が、`false`なら本番用の`PlayManager`がInjectされます。
+
+実際に`IsTest`のチェックボックスをOn・Offの状態で`Play`シーンを再生してみてください。生成されるステージが変わっていることがわかると思います。
+
+とても簡単になりましたが、実践は以上となります。
+
+前回の学祭のUnity側リポジトリなどをのぞいてみると、さらに具体的な用法がわかるかとおもいます。(DIを活用しきれていない部分もありますが…)
+
+https://github.com/tuatmcc/SchoolFestival2024_Unity
+
 ## その他Tipsなど
+ここまでDIについて簡単に説明してきました。DIは非常に深いため著者が理解している部分はほんの一部に過ぎないことはご承知おきください。以下に今回の講習に関してTipsを書いておきます。
+
 ### Injectなどのタイミング
 開発中は`NullReferenceException`が多く発生しますが、その一因としてInjectが行われる前に参照してしまうというものがあります。以下の記事などを参考に、Injectの設定が正しく、参照のタイミングに問題がないかも確認しましょう。
 
