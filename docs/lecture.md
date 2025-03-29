@@ -153,7 +153,7 @@ using Zenject;
 
 namespace RougueBit.Core
 {
-    public class GameStateManager: IGameManager, IInitializable, IDisposable
+    public class GameStateManager: IGameStateManager, IInitializable, IDisposable
     {
         public event Action<GameState> OnGameStateChanged;
 
@@ -174,6 +174,8 @@ namespace RougueBit.Core
 
         public CoreInputs CoreInputs { get; set; } = new();
 
+        private readonly CompositeDisposable disposables = new();
+
         // Awakeに相当
         public GameStateManager()
         {
@@ -188,11 +190,11 @@ namespace RougueBit.Core
             Observable.FromEvent<InputAction.CallbackContext>(
                 h => CoreInputs.Main.Reset.performed += h,
                 h => CoreInputs.Main.Reset.performed -= h
-            ).Subscribe(_ => Reset());
+            ).Subscribe(_ => Reset()).AddTo(disposables);
             Observable.FromEvent<GameState>(
                 h => OnGameStateChanged += h,
                 h => OnGameStateChanged -= h
-            ).Subscribe(TransitScene);
+            ).Subscribe(TransitScene).AddTo(disposables);
         }
 
         public void NextScene()
@@ -235,6 +237,7 @@ namespace RougueBit.Core
         // OnDestroyに相当
         public void Dispose()
         {
+            disposables.Dispose();
             CoreInputs.Dispose();
         }
     }
@@ -326,6 +329,8 @@ namespace RougueBit.Title
 
         public TitleInputs TitleInputs { get; private set; } = new();
 
+        private CompositeDisposable disposables = new();
+
         public TitleManager()
         {
             TitleInputs.Enable();
@@ -336,11 +341,12 @@ namespace RougueBit.Title
             Observable.FromEvent<InputAction.CallbackContext>(
                 h => TitleInputs.Main.Enter.performed += h,
                 h => TitleInputs.Main.Enter.performed -= h
-            ).Subscribe(_ => _gameStateManager.NextScene());
+            ).Subscribe(_ => _gameStateManager.NextScene()).AddTo(disposables);
         }
 
         public void Dispose()
         {
+            disposables.Dispose();
             TitleInputs.Disable();
         }
     }
@@ -566,6 +572,7 @@ namespace RougueBit.Play.Tests
         private PlayState playState;
         private IStageGeneratable stageGenerator;
         private PlaySceneSO playSceneSO;
+        private CompositeDisposable disposables = new();
 
         [Inject]
         public TestPlayManager(PlaySceneSO playSceneSO)
@@ -580,7 +587,7 @@ namespace RougueBit.Play.Tests
             Observable.FromEvent<PlayState>(
                 h => OnPlayStateChanged += h,
                 h => OnPlayStateChanged -= h
-            ).Subscribe(NextState);
+            ).Subscribe(NextState).AddTo(disposables);
             PlayState = PlayState.GenerateStage;
         }
 
@@ -602,6 +609,7 @@ namespace RougueBit.Play.Tests
 
         public void Dispose()
         {
+            disposables.Dispose();
             PlayInputs.Disable();
         }
     }
