@@ -1,7 +1,7 @@
 using UnityEngine;
 using Zenject;
 
-namespace RougueBit.Title
+namespace RougueBit.Title.DI
 {
     public class TitleManagerInstaller : MonoInstaller
     {
