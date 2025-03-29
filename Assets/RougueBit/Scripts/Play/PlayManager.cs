@@ -24,7 +24,7 @@ namespace RougueBit.Play
         private PlayState playState;
         private PlaySceneSO playSceneSO;
         private readonly IStageGeneratable stageGenerator;
-        private CompositeDisposable disposables;
+        private CompositeDisposable disposables = new();
 
         [Inject]
         public PlayManager(PlaySceneSO playSceneSO)
