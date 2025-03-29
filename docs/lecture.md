@@ -131,7 +131,7 @@ Assets/
 ```c#:IGameStateManager.cs
 using System;
 
-namespace RougueBit.Core
+namespace RougueBit.Core.Interface
 {
     public interface IGameStateManager
     {
