@@ -24,6 +24,7 @@ namespace RougueBit.Play
         private PlayState playState;
         private PlaySceneSO playSceneSO;
         private readonly IStageGeneratable stageGenerator;
+        private CompositeDisposable disposables;
 
         [Inject]
         public PlayManager(PlaySceneSO playSceneSO)
@@ -38,7 +39,7 @@ namespace RougueBit.Play
             Observable.FromEvent<PlayState>(
                 h => OnPlayStateChanged += h,
                 h => OnPlayStateChanged -= h
-            ).Subscribe(NextState);
+            ).Subscribe(NextState).AddTo(disposables);
             PlayState = PlayState.GenerateStage;
         }
 
@@ -60,6 +61,7 @@ namespace RougueBit.Play
 
         public void Dispose()
         {
+            disposables.Dispose();
             PlayInputs.Dispose();
         }
     }

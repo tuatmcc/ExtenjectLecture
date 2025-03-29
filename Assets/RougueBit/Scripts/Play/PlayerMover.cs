@@ -41,7 +41,7 @@ namespace RougueBit.Play
                     // IsKenematicがfalseだとtransformで位置を変更できない
                     rb.position = new Vector3(playSceneSO.PlayerStartPosition.x, 0, playSceneSO.PlayerStartPosition.y);
                 }
-            });
+            }).AddTo(this);
         }
 
         // メモ: 移動は Update() + Time.deltaTimeを使うとカクついてしまうのでFixedUpdate()を使う
