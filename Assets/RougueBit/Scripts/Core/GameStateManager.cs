@@ -27,6 +27,8 @@ namespace RougueBit.Core
 
         public CoreInputs CoreInputs { get; set; } = new();
 
+        private readonly CompositeDisposable disposables = new();
+
         // Awakeに相当
         public GameStateManager()
         {
@@ -41,11 +43,11 @@ namespace RougueBit.Core
             Observable.FromEvent<InputAction.CallbackContext>(
                 h => CoreInputs.Main.Reset.performed += h,
                 h => CoreInputs.Main.Reset.performed -= h
-            ).Subscribe(_ => Reset());
+            ).Subscribe(_ => Reset()).AddTo(disposables);
             Observable.FromEvent<GameState>(
                 h => OnGameStateChanged += h,
                 h => OnGameStateChanged -= h
-            ).Subscribe(TransitScene);
+            ).Subscribe(TransitScene).AddTo(disposables);
         }
 
         public void NextScene()
@@ -88,6 +90,7 @@ namespace RougueBit.Core
         // OnDestroyに相当
         public void Dispose()
         {
+            disposables.Dispose();
             CoreInputs.Dispose();
         }
     }
