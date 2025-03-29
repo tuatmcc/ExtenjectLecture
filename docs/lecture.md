@@ -398,6 +398,8 @@ Enterを押すと`Play`シーンに移動する処理が書かれています。
 ## ブランチ移動
 これまでの変更をStashするかDiscardして、ブランチ`lecture-checkpoints/2`に移動してください。
 
+(PlaySceneOSが無いというエラーが出ますが、この後作成するので一旦無視してください)
+
 ## Injectを活用する
 
 ### Scriptable ObjectをInjectする
