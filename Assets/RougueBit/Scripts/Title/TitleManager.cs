@@ -12,6 +12,8 @@ namespace RougueBit.Title
 
         public TitleInputs TitleInputs { get; private set; } = new();
 
+        private CompositeDisposable disposables = new();
+
         public TitleManager()
         {
             TitleInputs.Enable();
@@ -22,11 +24,12 @@ namespace RougueBit.Title
             Observable.FromEvent<InputAction.CallbackContext>(
                 h => TitleInputs.Main.Enter.performed += h,
                 h => TitleInputs.Main.Enter.performed -= h
-            ).Subscribe(_ => _gameStateManager.NextScene());
+            ).Subscribe(_ => _gameStateManager.NextScene()).AddTo(disposables);
         }
 
         public void Dispose()
         {
+            disposables.Dispose();
             TitleInputs.Disable();
         }
     }
